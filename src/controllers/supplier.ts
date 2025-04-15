@@ -1,10 +1,20 @@
 import SupplierModel from "../models/SupplierModel";
 
-const getProducts = async (req: any, res: any) => {
+const getSuppliers = async (req: any, res: any) => {
+    const {pageSize, page} = req.query;
+    
     try {
+        const skip = (page - 1) * pageSize;
+
+        const items = await SupplierModel.find({ isDeleted: false })
+        .skip(skip)
+        .limit(pageSize);
+
+        const total = await SupplierModel.countDocuments();
+
         res.status(200).json({
-            message: 'Product',
-            data: [],
+            message: 'Suppiers',
+            data: {total, items},
         });
     } catch (error: any) {
         res.status(404).json({
@@ -29,4 +39,38 @@ const addNew = async (req: any, res: any) => {
     }
 };
 
-export { addNew };
+const update = async (req: any, res: any) => {
+    const body = req.body;
+    const { id } = req.query;
+    try {
+        await SupplierModel.findByIdAndUpdate(id, body);
+
+        res.status(200).json({
+            message: 'Supplier updated successfully!',
+            data: [],
+        });
+    } catch (error: any) {
+        res.status(404).json({
+            message: error.message,
+        });
+    }
+};
+
+const remove = async (req: any, res: any) => {
+    const { id } = req.query;
+    try {
+        await SupplierModel.findByIdAndDelete(id);
+
+        res.status(200).json({
+            message: 'Supplier deleted successfully!',
+            data: [],
+        });
+    } catch (error: any) {
+        res.status(404).json({
+            message: error.message,
+        });
+    }
+};
+
+
+export { addNew, getSuppliers, update, remove };
